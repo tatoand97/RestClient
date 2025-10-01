@@ -1,4 +1,3 @@
-﻿using NameProject.RestClient.Configurations;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -16,5 +15,4 @@ public interface IRestClientService
     Task<T> Put<T>(string service, string path, object payload);
     Task<HttpResponseMessage> Delete(string service, string path);
     Task<T> Delete<T>(string service, string path);
-    void RefreshConfigurationOptions(RestClientOptions options);
 }

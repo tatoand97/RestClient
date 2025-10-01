@@ -1,25 +1,21 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace NameProject.RestClient.Configurations;
 
 public class TokenSetting : BaseRestClientSetting
 {
-    public string Path { get; set; }
-    public string GrantType { get; set; }
-    public string ClientId { get; set; }
-    public string Scope { get; set; }
-    public string ClientSecret { get; set; }
-    public string ContentType { get; set; }
+    public required string Path { get; set; }
+    public required string GrantType { get; set; }
+    public required string ClientId { get; set; }
+    public required string Scope { get; set; }
+    public required string ClientSecret { get; set; }
+    public string ContentType { get; set; } = "application/x-www-form-urlencoded";
 
-    public Dictionary<string, string> GetTokenRequestBody()
+    public Dictionary<string, string> GetTokenRequestBody() => new()
     {
-        return new Dictionary<string, string>
-        {
-            {"client_id", ClientId},
-            {"client_secret", ClientSecret},
-            {"grant_type", GrantType},
-            {"scope", Scope},
-        };
-    }
-
+        { "client_id", ClientId },
+        { "client_secret", ClientSecret },
+        { "grant_type", GrantType },
+        { "scope", Scope },
+    };
 }
