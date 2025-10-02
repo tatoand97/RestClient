@@ -5,10 +5,12 @@ namespace NameProject.RestClient.Configurations;
 
 public class TokenResponseDto
 {
-    [JsonPropertyName(Constants.ACCESSTOKEN)]
-    public string AccessToken { get; set; }
-    [JsonPropertyName(Constants.EXPIREIN)]
+    [JsonPropertyName(Constants.AccessTokenKey)]
+    public string? AccessToken { get; set; }
+
+    [JsonPropertyName(Constants.ExpiresInKey)]
     public int ExpireIn { get; set; }
-    [JsonPropertyName(Constants.TOKENTYPE)]
-    public string TokenType { get; set; }
+
+    [JsonPropertyName(Constants.TokenTypeKey)]
+    public string? TokenType { get; set; }
 }

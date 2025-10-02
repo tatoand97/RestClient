@@ -1,17 +1,15 @@
-using Microsoft.Extensions.Logging;
+﻿using System.Net;
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using NameProject.RestClient.Configurations;
 using NameProject.RestClient.Exceptions;
+using NameProject.RestClient.Handlers;
 using NameProject.RestClient.Interfaces;
 using Polly;
 using Polly.Contrib.WaitAndRetry;
 using Polly.Extensions.Http;
 using Polly.Retry;
-using System;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace NameProject.RestClient.Services;
 
@@ -57,7 +55,20 @@ public class RestClientService : IRestClientService
         {
             var client = _clientFactory.CreateClient(service);
             var endpoint = new Uri(serviceSetting.BaseAddress, path).ToString();
-            return await call(client, endpoint).ConfigureAwait(false);
+
+            async Task<HttpResponseMessage> ExecuteAsync()
+                => await call(client, endpoint).ConfigureAwait(false);
+
+            var response = await ExecuteAsync().ConfigureAwait(false);
+            if (response.StatusCode == HttpStatusCode.Unauthorized && serviceSetting.TokenRequest is not null)
+            {
+                _logger.LogInformation("Received 401 for service {Service}. Refreshing token and retrying once.", service);
+                response.Dispose();
+                OAuthTokenHandler.InvalidateToken(service);
+                response = await ExecuteAsync().ConfigureAwait(false);
+            }
+
+            return response;
         }
         catch (Exception ex)
         {
@@ -66,7 +77,7 @@ public class RestClientService : IRestClientService
         }
     }
 
-    private RestClientServiceSetting GetServiceSetting(string service, RestClientOptions options)
+    private static RestClientServiceSetting GetServiceSetting(string service, RestClientOptions options)
         => options.Services.TryGetValue(service, out var serviceSetting)
             ? serviceSetting
             : throw new InvalidOperationException($"Service {service} not found.");
