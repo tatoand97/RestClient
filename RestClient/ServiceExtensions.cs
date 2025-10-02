@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using NameProject.RestClient.Configurations;
 using NameProject.RestClient.Interfaces;
 using NameProject.RestClient.Services;

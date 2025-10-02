@@ -1,6 +1,3 @@
-using System.Net.Http;
-using System.Threading.Tasks;
-
 namespace NameProject.RestClient.Interfaces;
 
 public interface IRestClientService

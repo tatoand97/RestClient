@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace NameProject.RestClient.Configurations;
 
 public class RestClientOptions
