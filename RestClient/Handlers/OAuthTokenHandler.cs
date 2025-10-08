@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -91,12 +91,14 @@ public class OAuthTokenHandler(
             httpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
         }
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, tokenSetting.TokenUrl)
+        using var request = new HttpRequestMessage(HttpMethod.Post, tokenSetting.TokenUrl);
+        var content = CreateTokenContent(tokenSetting);
+        if (content is not null)
         {
-            Content = CreateTokenContent(tokenSetting)
-        };
+            request.Content = content;
+        }
 
-        var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        using var response = await httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -125,8 +127,13 @@ public class OAuthTokenHandler(
         return DateTimeOffset.UtcNow.AddSeconds(effectiveSeconds);
     }
 
-    private static HttpContent CreateTokenContent(TokenSetting tokenSetting)
+    private static HttpContent? CreateTokenContent(TokenSetting tokenSetting)
     {
+        if (!tokenSetting.SendRequestBody)
+        {
+            return null;
+        }
+
         var body = tokenSetting.GetTokenRequestBody();
         if (string.Equals(tokenSetting.ContentType, "application/json", StringComparison.OrdinalIgnoreCase))
         {

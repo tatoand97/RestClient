@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace NameProject.RestClient.Configurations;
@@ -17,6 +17,7 @@ public class TokenSetting
     public required string ClientSecret { get; set; }
     public string ContentType { get; set; } = DefaultContentType;
     public Dictionary<string, string> DefaultRequestHeaders { get; set; } = new(StringComparer.OrdinalIgnoreCase);
+    public bool SendRequestBody { get; set; } = true;
 
     public Dictionary<string, string> GetTokenRequestBody()
     {
