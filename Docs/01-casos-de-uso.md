@@ -1,14 +1,14 @@
-# Casos de uso tipicos
+# Casos de uso típicos
 
-Esta guia resume los escenarios mas comunes al consumir `IRestClientService`. Todos los ejemplos asumen que el servicio ya fue configurado mediante `RestClientServiceConfigurator.Configure`.
+Esta guía resume los escenarios más comunes al consumir `IRestClientService`. Todos los ejemplos asumen que el servicio ya fue configurado mediante `RestClientServiceConfigurator.Configure`.
 
 ## Antes de iniciar
-- Inyecta `IRestClientService` en las clases que actuaran como consumidores.
+- Inyecta `IRestClientService` en las clases que actuarán como consumidores.
 - Usa el nombre del servicio configurado (`RestClient:Services[*]:Name`) para seleccionar el cliente apropiado.
 - Define rutas relativas (`path`) comenzando con `/` para que se combinen con `BaseUrl`.
 
-## Ejemplo: solicitudes GET tipicas
-Utiliza los metodos genericos cuando la respuesta se mapea a un DTO, o los metodos que regresan `HttpResponseMessage` cuando necesitas acceso completo al mensaje.
+## Ejemplo: solicitudes GET típicas
+Utiliza los métodos genéricos cuando la respuesta se mapea a un DTO, o los métodos que regresan `HttpResponseMessage` cuando necesitas acceso completo al mensaje.
 
 ```csharp
 public sealed record ProductDto(Guid Id, string Name, decimal Price);
@@ -31,10 +31,10 @@ public class CatalogController : ControllerBase
 }
 ```
 
-Cuando necesites inspeccionar encabezados o el cuerpo crudo, usa la sobrecarga que devuelve `HttpResponseMessage` y maneja la disposicion del mensaje.
+Cuando necesites inspeccionar encabezados o el cuerpo crudo, usa la sobrecarga que devuelve `HttpResponseMessage` y maneja la disposición del mensaje.
 
 ## Ejemplo: solicitudes POST con payload JSON
-Los metodos `Post` aceptan payload como `object` o `string`. La version de objeto serializa usando `System.Text.Json` con equivalencia de nombres insensible a mayusculas.
+Los métodos `Post` aceptan payload como `object` o `string`. La versión de objeto serializa usando `System.Text.Json` con equivalencia de nombres insensible a mayúsculas.
 
 ```csharp
 public async Task<Guid> CreateProductAsync(ProductDto input, CancellationToken ct)
@@ -48,7 +48,7 @@ Si el servicio devuelve un identificador simple en texto plano, cambia a la sobr
 
 ## Ejemplo: PUT y DELETE
 - `Put<T>` sigue la misma firma que `Post<T>` y es ideal para operaciones idempotentes.
-- `Delete<T>` permite deserializar la respuesta de una eliminacion que regrese contenido (por ejemplo, el recurso final).
+- `Delete<T>` permite deserializar la respuesta de una eliminación que regrese contenido (por ejemplo, el recurso final).
 
 ```csharp
 public Task DeleteProductAsync(Guid id, CancellationToken ct)
@@ -58,7 +58,7 @@ public Task DeleteProductAsync(Guid id, CancellationToken ct)
 ```
 
 ## Manejo de errores
-Todas las operaciones realizan validaciones de estado y lanzan `RestRequestFailedException` cuando la respuesta no es exitosa o la deserializacion falla. Envuelve tus llamadas en bloques `try-catch` para capturar detalles y traducirlos a errores de dominio.
+Todas las operaciones realizan validaciones de estado y lanzan `RestRequestFailedException` cuando la respuesta no es exitosa o la deserialización falla. Envuelve tus llamadas en bloques `try-catch` para capturar detalles y traducirlos a errores de dominio.
 
 ```csharp
 try
@@ -67,16 +67,16 @@ try
 }
 catch (RestRequestFailedException ex)
 {
-    logger.LogWarning(ex, "El servicio remoto rechazo la solicitud");
+    logger.LogWarning(ex, "El servicio remoto rechazó la solicitud");
     throw new ProductNotFoundException();
 }
 ```
 
 ## Reintentos automatizados
-La implementacion se apoya en Polly y utiliza `HttpClientRetry` y `HttpClientDelay` desde configuracion. Ajusta estos valores segun los SLA de los servicios remotos. Los reintentos aplican para errores transitorios (`5xx`, problemas de red, etc.).
+La implementación se apoya en Polly y utiliza `HttpClientRetry` y `HttpClientDelay` desde configuración. Ajusta estos valores según los SLA de los servicios remotos. Los reintentos aplican para errores transitorios (`5xx`, problemas de red, etc.).
 
-## Buenas practicas
-- Evita construir rutas con concatenaciones manuales; utiliza `Uri.EscapeDataString` para parametros dinamicos.
-- Centraliza los nombres de servicio en constantes para prevenir errores tipograficos.
+## Buenas prácticas
+- Evita construir rutas con concatenaciones manuales; utiliza `Uri.EscapeDataString` para parámetros dinámicos.
+- Centraliza los nombres de servicio en constantes para prevenir errores tipográficos.
 - Considera crear adaptadores que traduzcan excepciones a respuestas HTTP propias de tu API.
 - Aprovecha `CancellationToken` para propagar cancelaciones desde la capa web o jobs.

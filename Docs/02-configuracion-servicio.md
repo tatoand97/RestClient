@@ -1,9 +1,9 @@
-# Configuracion del servicio
+# Configuración del servicio
 
-Esta guia detalla como registrar la libreria y declarar la configuracion requerida en archivos de entorno (por ejemplo `appsettings.json`).
+Esta guía detalla cómo registrar la librería y declarar la configuración requerida en archivos de entorno (por ejemplo `appsettings.json`).
 
 ## Registro en el contenedor
-Invoca el configurador desde la inicializacion de tu aplicacion. El metodo de extension `AddHttpClientConfiguration` encapsula la llamada.
+Invoca el configurador desde la inicialización de tu aplicación. El método de extensión `AddHttpClientConfiguration` encapsula la llamada.
 
 ```csharp
 var builder = WebApplication.CreateBuilder(args);
@@ -19,8 +19,8 @@ Si prefieres llamar al configurador directamente, usa:
 RestClientServiceConfigurator.Configure(builder.Services, builder.Configuration);
 ```
 
-## Estructura de configuracion
-Agrega una seccion `RestClient` con los valores de reintento y la lista de servicios disponibles.
+## Estructura de configuración
+Agrega una sección `RestClient` con los valores de reintento y la lista de servicios disponibles.
 
 ```json
 {
@@ -55,12 +55,12 @@ Agrega una seccion `RestClient` con los valores de reintento y la lista de servi
 ```
 
 ## Reglas claves
-- `HttpClientRetry` y `HttpClientDelay` deben ser mayores a cero; de lo contrario se lanzara una excepcion de configuracion.
-- Cada servicio requiere `Name` unico y un `BaseUrl` absoluto.
+- `HttpClientRetry` y `HttpClientDelay` deben ser mayores a cero; de lo contrario se lanzará una excepción de configuración.
+- Cada servicio requiere `Name` único y un `BaseUrl` absoluto.
 - Los encabezados declarados se aplican tal cual al `HttpClient` denominado.
-- Si la seccion `Auth` esta presente se crea y adjunta un `OAuthHandler` para administrar tokens.
+- Si la sección `Auth` está presente se crea y adjunta un `OAuthHandler` para administrar tokens.
 - Al menos un servicio debe estar definido dentro de `Services`.
 
-## Configuracion por entorno
+## Configuración por entorno
 - Ajusta credenciales y endpoints por ambiente usando `appsettings.Development.json`, `appsettings.Staging.json`, etc.
 - Cuando utilices Azure App Configuration o Key Vault, vincula los valores sensibles (`ClientSecret`) mediante referencias para evitar exponerlos en archivos.

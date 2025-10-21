@@ -1,9 +1,9 @@
 # Manejo de respuestas
 
-`RestClientService` ofrece sobrecargas tipadas y sin procesar para consumir respuestas HTTP. Esta guia explica como interpretar resultados, validar estados y surfear errores.
+`RestClientService` ofrece sobrecargas tipadas y sin procesar para consumir respuestas HTTP. Esta guía explica cómo interpretar resultados, validar estados y surfear errores.
 
-## Deserializacion automatica
-- Los metodos genericos (`Get<T>`, `Post<T>`, `Put<T>`, `Delete<T>`) usan `System.Text.Json` con `PropertyNameCaseInsensitive = true`.
+## Deserialización automática
+- Los métodos genéricos (`Get<T>`, `Post<T>`, `Put<T>`, `Delete<T>`) usan `System.Text.Json` con `PropertyNameCaseInsensitive = true`.
 - Asegura que tus DTO usen nombres compatibles o agrega atributos `[JsonPropertyName]` cuando difieran.
 
 ```csharp
@@ -17,10 +17,10 @@ public sealed class OrderDto
 var order = await restClient.Get<OrderDto>("Pedidos", "/v1/orders/123", ct);
 ```
 
-Si la deserializacion falla, se lanza `RestRequestFailedException` e incluye detalles en el log con el payload truncado.
+Si la deserialización falla, se lanza `RestRequestFailedException` e incluye detalles en el log con el payload truncado.
 
 ## Acceso a HttpResponseMessage
-Cuando necesitas encabezados personalizados, codigos de estado no exitosos o streams sin deserializar, emplea las sobrecargas que regresan `HttpResponseMessage`.
+Cuando necesitas encabezados personalizados, códigos de estado no exitosos o streams sin deserializar, emplea las sobrecargas que regresan `HttpResponseMessage`.
 
 ```csharp
 using var response = await restClient.Get("Pedidos", "/v1/orders", ct);
@@ -36,15 +36,15 @@ return await JsonSerializer.DeserializeAsync<OrderDto[]>(content, cancellationTo
 
 Recuerda desechar manualmente el mensaje (`using` o `await using`) para liberar sockets.
 
-## Validacion de estado
-- `EnsureSuccessStatusAsync` valida que `IsSuccessStatusCode` sea verdadero y, en caso contrario, captura el cuerpo para diagnostico.
-- El mensaje del log incluye metodo, URL y estado numerico, lo que facilita correlacionar fallos.
+## Validación de estado
+- `EnsureSuccessStatusAsync` valida que `IsSuccessStatusCode` sea verdadero y, en caso contrario, captura el cuerpo para diagnóstico.
+- El mensaje del log incluye método, URL y estado numérico, lo que facilita correlacionar fallos.
 
 ## Excepciones relevantes
-- `RestRequestFailedException`: encapsula el cuerpo y el `StatusCode` cuando la respuesta no es exitosa o la deserializacion falla.
-- `InvalidOperationException`: aparece durante la configuracion si faltan valores requeridos.
+- `RestRequestFailedException`: encapsula el cuerpo y el `StatusCode` cuando la respuesta no es exitosa o la deserialización falla.
+- `InvalidOperationException`: aparece durante la configuración si faltan valores requeridos.
 
-Atrapa `RestRequestFailedException` para traducirla a respuestas especificas o reintentos aplicacion.
+Atrapa `RestRequestFailedException` para traducirla a respuestas específicas o reintentos en la aplicación.
 
 ```csharp
 try
@@ -58,8 +58,8 @@ catch (RestRequestFailedException ex) when (ex.StatusCode == HttpStatusCode.NotF
 ```
 
 ## Manejo de contenido grande
-- La libreria registra un maximo de 2048 caracteres del cuerpo en logs para evitar fuga de informacion sensible.
+- La librería registra un máximo de 2048 caracteres del cuerpo en logs para evitar fuga de información sensible.
 - Para contenido voluminoso considera usar streams (`ReadAsStreamAsync`) y procesarlo incrementalmente.
 
 ## JsonSerializerOptions personalizados
-Si requieres opciones diferentes (por ejemplo `CamelCase` o conversores), crea un servicio adaptador que invoque `Get` o `Post` sin genericos y deserialice manualmente con tus propias opciones.
+Si requieres opciones diferentes (por ejemplo `CamelCase` o conversores), crea un servicio adaptador que invoque `Get` o `Post` sin genéricos y deserialice manualmente con tus propias opciones.

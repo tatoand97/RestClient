@@ -1,14 +1,14 @@
-# Personalizacion avanzada
+# Personalización avanzada
 
 Una vez configurado el cliente base, puedes ajustar la resiliencia, los handlers y el comportamiento de `HttpClient` para cubrir escenarios avanzados.
 
-## Ajuste de politicas de reintento
+## Ajuste de políticas de reintento
 - `HttpClientRetry` controla la cantidad de reintentos ante errores transitorios.
 - `HttpClientDelay` define la base (en segundos) para el backoff con jitter.
-- Considera valores mas bajos para servicios idempotentes sensibles y mas altos para operaciones con baja concurrencia.
+- Considera valores más bajos para servicios idempotentes sensibles y más altos para operaciones con baja concurrencia.
 
-## Configurar timeouts y tamanos de buffer
-Usa `IOptions<HttpClientFactoryOptions>` para modificar el cliente nombrado despues de la configuracion inicial.
+## Configurar timeouts y tamaños de buffer
+Usa `IOptions<HttpClientFactoryOptions>` para modificar el cliente nombrado después de la configuración inicial.
 
 ```csharp
 services.Configure<HttpClientFactoryOptions>("Catalogo", options =>
@@ -22,8 +22,8 @@ services.Configure<HttpClientFactoryOptions>("Catalogo", options =>
 ```
 
 ## Inyectar handlers adicionales
-- Registra `DelegatingHandler` personalizados para auditoria, trazas o firma de peticiones.
-- Aprovecha que los clientes se crean por nombre y encadena handlers segun la necesidad de cada servicio.
+- Registra `DelegatingHandler` personalizados para auditoría, trazas o firma de peticiones.
+- Aprovecha que los clientes se crean por nombre y encadena handlers según la necesidad de cada servicio.
 
 ```csharp
 services.AddTransient<TelemetryHandler>();
@@ -37,13 +37,13 @@ services.Configure<HttpClientFactoryOptions>("Catalogo", options =>
 });
 ```
 
-## Personalizacion del flujo de token
-- Extiende `OAuthTokenHandler` heredando y registrando tu propia implementacion si necesitas almacenar tokens en cache externa (por ejemplo Redis).
-- Alternativamente, crea un handler decorador que lea el token emitido y lo replique en telemetria.
+## Personalización del flujo de token
+- Extiende `OAuthTokenHandler` heredando y registrando tu propia implementación si necesitas almacenar tokens en caché externa (por ejemplo Redis).
+- Alternativamente, crea un handler decorador que lea el token emitido y lo replique en telemetría.
 
-## Separacion de scopes
-- Declara multiples servicios con el mismo `BaseUrl` pero scopes distintos para aislar permisos.
-- Centraliza las constantes de nombre y scope en una clase estatica para mantener la configuracion sincronizada con el codigo.
+## Separación de scopes
+- Declara múltiples servicios con el mismo `BaseUrl` pero scopes distintos para aislar permisos.
+- Centraliza las constantes de nombre y scope en una clase estática para mantener la configuración sincronizada con el código.
 
 ## Ajustes por entorno
 - Carga configuraciones adicionales mediante `IConfiguration` (por ejemplo `appsettings.Production.json`) y evita hardcodear valores.
