@@ -191,6 +191,15 @@ internal static class RestClientServiceConfigurator
             ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             : new Dictionary<string, string>(authDefinition.DefaultRequestHeaders, StringComparer.OrdinalIgnoreCase);
 
+        if (authDefinition.Type == AuthenticationType.OAuth2Header)
+        {
+            TryAddHeader(headers, "ClientId", clientId);
+            TryAddHeader(headers, "ClientSecret", clientSecret);
+            TryAddHeader(headers, "GrantType", grantType);
+            //TryAddHeader(headers, "Scope", scope);
+            //TryAddHeader(headers, "Audience", audience);
+        }
+
         return new TokenSetting
         {
             TokenUrl = tokenUrl,
@@ -206,6 +215,14 @@ internal static class RestClientServiceConfigurator
                 : authDefinition.ContentType!,
             DefaultRequestHeaders = headers
         };
+
+        static void TryAddHeader(IDictionary<string, string> target, string key, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value) && !target.ContainsKey(key))
+            {
+                target[key] = value;
+            }
+        }
     }
 
     /// <summary>
