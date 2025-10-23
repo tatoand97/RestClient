@@ -191,11 +191,6 @@ internal static class RestClientServiceConfigurator
             ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             : new Dictionary<string, string>(authDefinition.DefaultRequestHeaders, StringComparer.OrdinalIgnoreCase);
 
-        if (authDefinition.Type == AuthenticationType.OAuth2Header && headers.ContainsKey("Authorization"))
-        {
-            headers.Remove("Authorization");
-        }
-
         return new TokenSetting
         {
             TokenUrl = tokenUrl,

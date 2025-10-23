@@ -1,6 +1,3 @@
-using System.Net.Http.Headers;
-using System.Text;
-
 namespace NameProject.RestClient.Configurations;
 
 public class TokenSetting
@@ -43,16 +40,5 @@ public class TokenSetting
         }
 
         return body;
-    }
-
-    public AuthenticationHeaderValue? GetClientAuthenticationHeader()
-    {
-        if (AuthenticationType != AuthenticationType.OAuth2Header)
-        {
-            return null;
-        }
-
-        var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{ClientId}:{ClientSecret}"));
-        return new AuthenticationHeaderValue("Basic", credentials);
     }
 }

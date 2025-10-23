@@ -85,12 +85,6 @@ public class OAuthTokenHandler(
         using var httpClient = _httpClientFactory.CreateClient();
         ConfigureHeaders(httpClient, tokenSetting.DefaultRequestHeaders);
 
-        var authenticationHeader = tokenSetting.GetClientAuthenticationHeader();
-        if (authenticationHeader is not null)
-        {
-            httpClient.DefaultRequestHeaders.Authorization = authenticationHeader;
-        }
-
         using var request = new HttpRequestMessage(HttpMethod.Post, tokenSetting.TokenUrl);
         var content = CreateTokenContent(tokenSetting);
         if (content is not null)
