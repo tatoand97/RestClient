@@ -1,6 +1,6 @@
 namespace NameProject.RestClient.Interfaces;
 
-public interface ICompanyRestClient
+public interface IRestClient
 {
     Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default);
 

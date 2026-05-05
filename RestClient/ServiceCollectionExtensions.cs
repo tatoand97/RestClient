@@ -12,7 +12,7 @@ namespace NameProject.RestClient;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCompanyRestClient<TClient, TImplementation>(
+    public static IServiceCollection AddRestClient<TClient, TImplementation>(
         this IServiceCollection services,
         IConfigurationSection section)
         where TClient : class
@@ -49,13 +49,13 @@ public static class ServiceCollectionExtensions
             var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
             var httpClient = httpClientFactory.CreateClient(clientName);
 
-            var companyClient = new CompanyRestClient(
+            var restClient = new Services.RestClient(
                 httpClient,
                 sp.GetRequiredService<IRestClientSerializer>(),
                 sp.GetRequiredService<IHttpErrorHandler>(),
-                sp.GetRequiredService<ILogger<CompanyRestClient>>());
+                sp.GetRequiredService<ILogger<Services.RestClient>>());
 
-            return ActivatorUtilities.CreateInstance<TImplementation>(sp, companyClient);
+            return ActivatorUtilities.CreateInstance<TImplementation>(sp, restClient);
         });
 
         return services;

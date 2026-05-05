@@ -21,7 +21,7 @@ namespace NameProject.RestClient.Tests;
 public sealed class RestClientBehaviorTests
 {
     [Fact]
-    public async Task TypedClientRegistration_InjectsCompanyRestClientIntoImplementationConstructor()
+    public async Task TypedClientRegistration_InjectsRestClientIntoImplementationConstructor()
     {
         using var handler = new RecordingHandler(_ => JsonResponse("""{"id":"123","status":"created"}"""));
         using var provider = BuildClientServices(
@@ -163,7 +163,7 @@ public sealed class RestClientBehaviorTests
     [Fact]
     public async Task GetAsync_WithNoContentThrowsClearInvalidOperationException()
     {
-        var client = CreateCompanyRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
+        var client = CreateRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => client.GetAsync<TestOrderDto>("/orders/123"));
 
@@ -173,7 +173,7 @@ public sealed class RestClientBehaviorTests
     [Fact]
     public async Task PostAsync_WithNoContentThrowsClearInvalidOperationException()
     {
-        var client = CreateCompanyRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
+        var client = CreateRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => client.PostAsync<TestOrderDto>("/orders", new { Id = "123" }));
 
@@ -183,7 +183,7 @@ public sealed class RestClientBehaviorTests
     [Fact]
     public async Task PutAsync_WithEmptyOkThrowsClearInvalidOperationException()
     {
-        var client = CreateCompanyRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+        var client = CreateRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
         {
             Content = new StringContent(string.Empty)
         }));
@@ -196,7 +196,7 @@ public sealed class RestClientBehaviorTests
     [Fact]
     public async Task DeleteAsync_SucceedsWithNoContent()
     {
-        var client = CreateCompanyRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
+        var client = CreateRestClient(new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.NoContent)));
 
         await client.DeleteAsync("/orders/123");
     }
@@ -589,8 +589,8 @@ public sealed class RestClientBehaviorTests
             services =>
             {
                 services.AddHttpClient(string.Empty).ConfigurePrimaryHttpMessageHandler(() => tokenHandler);
-                services.AddCompanyRestClient<ITestOrdersApiClient, TestOrdersApiClient>(BuildConfigurationSection("OrdersApi"));
-                services.AddCompanyRestClient<ITestPaymentsApiClient, TestPaymentsApiClient>(BuildConfigurationSection("PaymentsApi"));
+                services.AddRestClient<ITestOrdersApiClient, TestOrdersApiClient>(BuildConfigurationSection("OrdersApi"));
+                services.AddRestClient<ITestPaymentsApiClient, TestPaymentsApiClient>(BuildConfigurationSection("PaymentsApi"));
                 services.AddHttpClient("OrdersApi").ConfigurePrimaryHttpMessageHandler(() => ordersHandler);
                 services.AddHttpClient("PaymentsApi").ConfigurePrimaryHttpMessageHandler(() => paymentsHandler);
             });
@@ -622,7 +622,7 @@ public sealed class RestClientBehaviorTests
     }
 
     [Fact]
-    public async Task CompanyRestClient_ThrowsExternalApiExceptionForNonSuccessResponse()
+    public async Task RestClient_ThrowsExternalApiExceptionForNonSuccessResponse()
     {
         using var handler = new RecordingHandler(_ => new HttpResponseMessage(HttpStatusCode.BadRequest)
         {
@@ -630,7 +630,7 @@ public sealed class RestClientBehaviorTests
             Content = new StringContent("invalid payload")
         });
 
-        var client = CreateCompanyRestClient(handler);
+        var client = CreateRestClient(handler);
 
         var exception = await Assert.ThrowsAsync<ExternalApiException>(() => client.GetAsync<TestOrderDto>("/orders/123"));
 
@@ -658,14 +658,14 @@ public sealed class RestClientBehaviorTests
             Content = new StringContent(body, Encoding.UTF8, "application/json")
         };
 
-    private static CompanyRestClient CreateCompanyRestClient(HttpMessageHandler handler)
+    private static Services.RestClient CreateRestClient(HttpMessageHandler handler)
     {
         var httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://orders.example/") };
-        return new CompanyRestClient(
+        return new Services.RestClient(
             httpClient,
             new DefaultRestClientSerializer(),
             new DefaultHttpErrorHandler(NullLogger<DefaultHttpErrorHandler>.Instance),
-            NullLogger<CompanyRestClient>.Instance);
+            NullLogger<Services.RestClient>.Instance);
     }
 
     private static DefaultAccessTokenProvider CreateTokenProvider(HttpMessageHandler handler)
@@ -735,7 +735,7 @@ public sealed class RestClientBehaviorTests
             configurationValues,
             services =>
             {
-                services.AddCompanyRestClient<ITestOrdersApiClient, TestOrdersApiClient>(
+                services.AddRestClient<ITestOrdersApiClient, TestOrdersApiClient>(
                     BuildConfigurationSection(clientName));
                 services.AddHttpClient(clientName).ConfigurePrimaryHttpMessageHandler(() => handler);
             });
@@ -855,7 +855,7 @@ public sealed class RestClientBehaviorTests
         Task<TestOrderDto> CreateOrderAsync(string orderId);
     }
 
-    private sealed class TestOrdersApiClient(ICompanyRestClient client) : ITestOrdersApiClient
+    private sealed class TestOrdersApiClient(IRestClient client) : ITestOrdersApiClient
     {
         public Task<TestOrderDto> GetOrderAsync(string orderId)
             => client.GetAsync<TestOrderDto>($"/orders/{orderId}");
@@ -869,7 +869,7 @@ public sealed class RestClientBehaviorTests
         Task<TestOrderDto> GetPaymentAsync(string paymentId);
     }
 
-    private sealed class TestPaymentsApiClient(ICompanyRestClient client) : ITestPaymentsApiClient
+    private sealed class TestPaymentsApiClient(IRestClient client) : ITestPaymentsApiClient
     {
         public Task<TestOrderDto> GetPaymentAsync(string paymentId)
             => client.GetAsync<TestOrderDto>($"/payments/{paymentId}");

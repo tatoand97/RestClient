@@ -78,7 +78,7 @@ internal static class RestClientResilienceHandlerBuilder
                     clientName);
             }
 
-            pipeline.AddRetry(CreateRetryOptions(clientName, options));
+            pipeline.AddRetry(CreateRetryOptions(options));
         }
 
         if (hasRetry && HasAttemptTimeout(options.Preset))
@@ -88,7 +88,6 @@ internal static class RestClientResilienceHandlerBuilder
     }
 
     private static RetryStrategyOptions<HttpResponseMessage> CreateRetryOptions(
-        string clientName,
         ResilienceOptions resilience)
     {
         var retry = resilience.Retry;

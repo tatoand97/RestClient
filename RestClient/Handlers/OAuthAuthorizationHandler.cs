@@ -41,7 +41,7 @@ public sealed class OAuthAuthorizationHandler(
         }
 
         var headers = request.Content.Headers
-            .Select(header => new KeyValuePair<string, string[]>(header.Key, header.Value.ToArray()))
+            .Select(header => KeyValuePair.Create(header.Key, header.Value.ToArray()))
             .ToArray();
         var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
         var originalContent = request.Content;

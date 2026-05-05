@@ -5,24 +5,17 @@ Typed HTTP clients for external APIs with per-client configuration, OAuth token 
 ## Registration
 
 ```csharp
-builder.Services.AddCompanyRestClient<IOrdersApiClient, OrdersApiClient>(
+builder.Services.AddRestClient<IOrdersApiClient, OrdersApiClient>(
     builder.Configuration.GetSection("HttpClients:OrdersApi"));
 ```
 
-Each typed client implementation receives the per-client `ICompanyRestClient` in its constructor:
+Each typed client implementation receives the per-client `IRestClient` in its constructor:
 
 ```csharp
-public sealed class OrdersApiClient : IOrdersApiClient
+public sealed class OrdersApiClient(IRestClient client) : IOrdersApiClient
 {
-    private readonly ICompanyRestClient _client;
-
-    public OrdersApiClient(ICompanyRestClient client)
-    {
-        _client = client;
-    }
-
     public Task<OrderDto> GetOrderAsync(string orderId, CancellationToken cancellationToken = default)
-        => _client.GetAsync<OrderDto>($"/orders/{orderId}", cancellationToken);
+        => client.GetAsync<OrderDto>($"/orders/{orderId}", cancellationToken);
 }
 ```
 

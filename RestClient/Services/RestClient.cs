@@ -5,16 +5,16 @@ using NameProject.RestClient.Interfaces;
 
 namespace NameProject.RestClient.Services;
 
-public sealed class CompanyRestClient(
+public sealed class RestClient(
     HttpClient httpClient,
     IRestClientSerializer serializer,
     IHttpErrorHandler errorHandler,
-    ILogger<CompanyRestClient> logger) : ICompanyRestClient
+    ILogger<RestClient> logger) : IRestClient
 {
     private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     private readonly IRestClientSerializer _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
     private readonly IHttpErrorHandler _errorHandler = errorHandler ?? throw new ArgumentNullException(nameof(errorHandler));
-    private readonly ILogger<CompanyRestClient> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<RestClient> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken = default)
     {
