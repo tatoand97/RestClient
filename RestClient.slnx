@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/RestClient.Tests/">
+    <Project Path="RestClient.Tests/NameProject.RestClient.Tests.csproj" />
+  </Folder>
+  <Folder Name="/RestClient/">
+    <Project Path="RestClient/NameProject.RestClient.csproj" />
+  </Folder>
+</Solution>

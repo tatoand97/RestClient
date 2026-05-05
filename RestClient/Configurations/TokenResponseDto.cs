@@ -1,16 +1,15 @@
-﻿using NameProject.RestClient.Common;
 using System.Text.Json.Serialization;
 
 namespace NameProject.RestClient.Configurations;
 
-public class TokenResponseDto
+internal sealed class TokenResponseDto
 {
-    [JsonPropertyName(Constants.AccessTokenKey)]
+    [JsonPropertyName("access_token")]
     public string? AccessToken { get; set; }
 
-    [JsonPropertyName(Constants.ExpiresInKey)]
-    public int ExpireIn { get; set; }
+    [JsonPropertyName("expires_in")]
+    public int ExpiresIn { get; set; }
 
-    [JsonPropertyName(Constants.TokenTypeKey)]
+    [JsonPropertyName("token_type")]
     public string? TokenType { get; set; }
 }
