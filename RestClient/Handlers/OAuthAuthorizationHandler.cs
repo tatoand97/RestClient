@@ -12,7 +12,7 @@ public sealed class OAuthAuthorizationHandler(
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        using var retryRequest = await CloneRequestAsync(request, cancellationToken).ConfigureAwait(false);
+        var bufferedContent = await BufferContentAsync(request, cancellationToken).ConfigureAwait(false);
 
         var token = await accessTokenProvider.GetTokenAsync(clientName, options, cancellationToken).ConfigureAwait(false);
         request.Headers.Authorization = new AuthenticationHeaderValue(token.TokenType, token.Value);
@@ -27,12 +27,32 @@ public sealed class OAuthAuthorizationHandler(
         await accessTokenProvider.InvalidateAsync(clientName, cancellationToken).ConfigureAwait(false);
 
         var refreshedToken = await accessTokenProvider.GetTokenAsync(clientName, options, cancellationToken).ConfigureAwait(false);
+        using var retryRequest = CloneRequest(request, bufferedContent);
         retryRequest.Headers.Authorization = new AuthenticationHeaderValue(refreshedToken.TokenType, refreshedToken.Value);
 
         return await base.SendAsync(retryRequest, cancellationToken).ConfigureAwait(false);
     }
 
-    private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    private static async Task<BufferedContent?> BufferContentAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        if (request.Content is null)
+        {
+            return null;
+        }
+
+        var headers = request.Content.Headers
+            .Select(header => new KeyValuePair<string, string[]>(header.Key, header.Value.ToArray()))
+            .ToArray();
+        var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
+        var originalContent = request.Content;
+
+        request.Content = CreateContent(contentBytes, headers);
+        originalContent.Dispose();
+
+        return new BufferedContent(contentBytes, headers);
+    }
+
+    private static HttpRequestMessage CloneRequest(HttpRequestMessage request, BufferedContent? bufferedContent)
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri)
         {
@@ -50,17 +70,24 @@ public sealed class OAuthAuthorizationHandler(
             clone.Options.Set(new HttpRequestOptionsKey<object?>(option.Key), option.Value);
         }
 
-        if (request.Content is not null)
+        if (bufferedContent is not null)
         {
-            var contentBytes = await request.Content.ReadAsByteArrayAsync(cancellationToken).ConfigureAwait(false);
-            clone.Content = new ByteArrayContent(contentBytes);
-
-            foreach (var header in request.Content.Headers)
-            {
-                clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
+            clone.Content = CreateContent(bufferedContent.Bytes, bufferedContent.Headers);
         }
 
         return clone;
     }
+
+    private static ByteArrayContent CreateContent(byte[] bytes, KeyValuePair<string, string[]>[] headers)
+    {
+        var content = new ByteArrayContent(bytes);
+        foreach (var header in headers)
+        {
+            content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+
+        return content;
+    }
+
+    private sealed record BufferedContent(byte[] Bytes, KeyValuePair<string, string[]>[] Headers);
 }

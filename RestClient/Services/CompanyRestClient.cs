@@ -1,4 +1,5 @@
 using System.Text;
+using System.Net;
 using Microsoft.Extensions.Logging;
 using NameProject.RestClient.Interfaces;
 
@@ -78,10 +79,27 @@ public sealed class CompanyRestClient(
 
     private async Task<TResponse> DeserializeResponseAsync<TResponse>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
+        if (response.StatusCode == HttpStatusCode.NoContent)
+        {
+            ThrowEmptyTypedResponse(response);
+        }
+
         var content = response.Content is null
             ? string.Empty
             : await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            ThrowEmptyTypedResponse(response);
+        }
+
         return _serializer.Deserialize<TResponse>(content);
+    }
+
+    private static void ThrowEmptyTypedResponse(HttpResponseMessage response)
+    {
+        var request = response.RequestMessage;
+        throw new InvalidOperationException(
+            $"HTTP request {request?.Method.Method ?? "UNKNOWN"} {request?.RequestUri?.ToString() ?? "unknown"} succeeded with status code {(int)response.StatusCode}, but the response body was empty. Typed methods require a JSON response body. No-content endpoints should use SendAsync, raw methods, DeleteAsync, or a dedicated no-content method.");
     }
 }
